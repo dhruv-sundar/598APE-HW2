@@ -34,3 +34,7 @@
 compile_commands.json
 .cache/
 genetic_benchmark
+
+#Profiles
+*.data
+*.data.old
