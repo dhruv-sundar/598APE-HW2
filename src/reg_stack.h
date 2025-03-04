@@ -13,19 +13,20 @@ namespace genetic {
  */
 template <typename DataT, int MaxSize> struct stack {
   explicit stack() : elements_(0) {
+    // could replace with memset
     for (int i = 0; i < MaxSize; ++i) {
       regs_[i] = DataT(0);
     }
   }
 
   /** Checks if the stack is empty */
-  bool empty() const { return elements_ == 0; }
+  inline bool empty() const { return elements_ == 0; }
 
   /** Current number of elements in the stack */
-  int size() const { return elements_; }
+  inline int size() const { return elements_; }
 
   /** Checks if the number of elements in the stack equal its capacity */
-  bool full() const { return elements_ == MaxSize; }
+  inline bool full() const { return elements_ == MaxSize; }
 
   /**
    * @brief Pushes the input element to the top of the stack
@@ -38,11 +39,15 @@ template <typename DataT, int MaxSize> struct stack {
    *       behavior.
    */
   void push(DataT val) {
-    for (int i = MaxSize - 1; i >= 0; --i) {
-      if (elements_ == i) {
-        ++elements_;
-        regs_[i] = val;
-      }
+    // for (int i = MaxSize - 1; i >= 0; --i) {
+    //   if (elements_ == i) {
+    //     ++elements_;
+    //     regs_[i] = val;
+    //   }
+    // }
+    if (!full()) {
+      regs_[elements_] = val;
+      elements_++;
     }
   }
 
@@ -58,14 +63,14 @@ template <typename DataT, int MaxSize> struct stack {
    *       to all sorts of incorrect behavior.
    */
   DataT pop() {
-    for (int i = 0; i < MaxSize; ++i) {
-      if (elements_ == (i + 1)) {
-        elements_--;
-        return regs_[i];
-      }
-    }
+    // for (int i = 0; i < MaxSize; ++i) {
+    //   if (elements_ == (i + 1)) {
+    //     elements_--;
+    //     return regs_[i];
+    //   }
+    // }
 
-    return DataT(0);
+    return empty() ? DataT(0) : regs_[(--elements_)];
   }
 
 private:
