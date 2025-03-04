@@ -42,7 +42,8 @@ void execute_kernel(const program_t d_progs, const float *data, float *y_pred,
           if (ar > 1)
             in[1] = eval_stack.pop();
         }
-        res = detail::evaluate_node(*curr_node, data, n_rows, row_id, in);
+        res = detail::evaluate_node_lookup(*curr_node, data, n_rows, row_id, in);
+        //res = detail::evaluate_node(*curr_node, data, n_rows, row_id, in);
         eval_stack.push(res);
         curr_node--;
         end--;

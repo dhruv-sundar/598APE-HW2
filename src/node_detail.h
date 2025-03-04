@@ -1,9 +1,10 @@
 #pragma once
 
+#include "../include/evaluate.h"
+#include "../include/node.h"
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
-#include <node.h>
 
 namespace genetic {
 namespace detail {
@@ -26,9 +27,23 @@ inline int arity(node::type t) {
   return 0;
 }
 
+inline float evaluate_node_lookup(const node &n, const float *data,
+                                  const uint64_t stride, const uint64_t idx,
+                                  const float *in) {
+  const auto &func = function_table[static_cast<size_t>(n.t)];
+  if (n.t == node::type::constant) {
+    return n.u.val;
+  } else if (n.t == node::type::variable) {
+    return data[(stride * n.u.fid) + idx];
+  } else {
+    return func(in[0], in[1]);
+  }
+}
+
 // `data` assumed to be stored in col-major format
-inline float evaluate_node(const node &n, const float *data, const uint64_t stride,
-                    const uint64_t idx, const float *in) {
+inline float evaluate_node(const node &n, const float *data,
+                           const uint64_t stride, const uint64_t idx,
+                           const float *in) {
   if (n.t == node::type::constant) {
     return n.u.val;
   } else if (n.t == node::type::variable) {
@@ -44,7 +59,8 @@ inline float evaluate_node(const node &n, const float *data, const uint64_t stri
     case node::type::atan2:
       return atan2f(in[0], in[1]);
     case node::type::div:
-      return abs_inval1 < MIN_VAL ? 1.0f : (in[0]/in[1]);//fdividef(in[0], in[1]);
+      return abs_inval1 < MIN_VAL ? 1.0f
+                                  : (in[0] / in[1]); // fdividef(in[0], in[1]);
     case node::type::fdim:
       return fdimf(in[0], in[1]);
     case node::type::max:
