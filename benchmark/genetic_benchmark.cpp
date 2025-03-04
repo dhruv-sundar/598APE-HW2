@@ -236,7 +236,7 @@ void run_symbolic_regression(const std::string &dataset_file) {
   genetic::symFit(X_train_flat.data(), y_train.data(), sample_weights.data(),
                   X_train.size(),    // Number of rows
                   X_train[0].size(), // Number of columns
-                  params, final_programs, history);
+                  params, final_programs, history); 
 
   // Debug printing
   // for (int i = 0; i < params.population_size; ++i) {
