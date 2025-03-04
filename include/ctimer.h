@@ -13,7 +13,6 @@
  * @copyright   Copyright (c) 2021 Supertech Research Group, CSAIL, MIT
  */
 
-
 /******************************************************************************/
 /* MIT License                                                                */
 /*                                                                            */
@@ -38,7 +37,6 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE          */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                     */
 /******************************************************************************/
-
 
 /**
  * @mainpage
@@ -98,15 +96,12 @@
  * @snippet ctimer_example.c ctimer_example
  */
 
-
 #ifndef __H_CTIMER__
 #define __H_CTIMER__
 
-
+#include <stdio.h>
 #include <time.h>
 #include <unistd.h>
-#include <stdio.h>
-
 
 /**
  * @defgroup ctimer CTimer
@@ -116,38 +111,29 @@
  * @{
  */
 
-
 /* prevent C++ compilers from mangling function names */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
 /* ==================================================
  * CONSTANTS
  * ================================================== */
 
-
 /* unit conversion constants */
-#ifdef __cplusplus              /* C++ */
+#ifdef __cplusplus /* C++ */
 namespace {
     const long _MSEC_PER_SEC = 1000;
     const long _USEC_PER_SEC = 1000 * 1000;
     const long _NSEC_PER_SEC = 1000 * 1000 * 1000;
-}
+} // namespace
 #else  /* C */
-enum {
-    _MSEC_PER_SEC = 1000,
-    _USEC_PER_SEC = 1000 * 1000,
-    _NSEC_PER_SEC = 1000 * 1000 * 1000
-};
-#endif  /* __cplusplus */
-
+enum { _MSEC_PER_SEC = 1000, _USEC_PER_SEC = 1000 * 1000, _NSEC_PER_SEC = 1000 * 1000 * 1000 };
+#endif /* __cplusplus */
 
 /* ==================================================
  * TIMESPEC API
  * ================================================== */
-
 
 /**
  * @defgroup ctimer_timespec Timespec API
@@ -157,7 +143,6 @@ enum {
  * @{
  */
 
-
 /**
  * Calculate the time difference between two `timespec` structs.  Store time in
  * sec and nsec in the `tv_sec` and `tv_nsec` field, respectively, of the output
@@ -165,14 +150,12 @@ enum {
  *
  * @sa https://stackoverflow.com/a/53708448/1036677
  */
-static inline
-void timespec_sub(
-    struct timespec       * t_diff, /**<[out] time difference */
-    struct timespec const   t_end,  /**<[in]  end time */
-    struct timespec const   t_start /**<[in]  start time */
+static inline void timespec_sub(struct timespec*      t_diff, /**<[out] time difference */
+                                struct timespec const t_end,  /**<[in]  end time */
+                                struct timespec const t_start /**<[in]  start time */
 ) {
     t_diff->tv_nsec = t_end.tv_nsec - t_start.tv_nsec;
-    t_diff->tv_sec  = t_end.tv_sec  - t_start.tv_sec;
+    t_diff->tv_sec  = t_end.tv_sec - t_start.tv_sec;
     if ((t_diff->tv_sec > 0) && (t_diff->tv_nsec < 0)) {
         t_diff->tv_nsec += _NSEC_PER_SEC;
         t_diff->tv_sec--;
@@ -184,39 +167,30 @@ void timespec_sub(
     /* (s < 0 & ns < 0) : do nothing (t_start > t_end) */
 }
 
-
 /**
  * Calculate the time sum of two `timespec` structs.  Store time in sec and nsec
  * in the `tv_sec` and `tv_nsec` field, respectively, of the output `timespec`.
  */
-static inline
-void timespec_add(
-    struct timespec       * t_sum, /**<[out] time sum */
-    struct timespec const   t1,    /**<[in]  time 1 */
-    struct timespec const   t2     /**<[in]  time 2 */
+static inline void timespec_add(struct timespec*      t_sum, /**<[out] time sum */
+                                struct timespec const t1,    /**<[in]  time 1 */
+                                struct timespec const t2     /**<[in]  time 2 */
 ) {
     t_sum->tv_nsec = t1.tv_nsec + t2.tv_nsec;
-    t_sum->tv_sec  = t1.tv_sec  + t2.tv_sec;
+    t_sum->tv_sec  = t1.tv_sec + t2.tv_sec;
     if (t_sum->tv_nsec >= _NSEC_PER_SEC) {
         t_sum->tv_nsec -= _NSEC_PER_SEC;
         t_sum->tv_sec++;
     }
 }
 
-
 /**
  * Return `timespec` time in sec.
  *
  * @return (t.tv_sec + t.tv_nsec) in sec
  */
-static inline
-double timespec_sec(
-    struct timespec const t
-) {
-    return (double)t.tv_sec
-        + (double)t.tv_nsec / _NSEC_PER_SEC;
+static inline double timespec_sec(struct timespec const t) {
+    return (double)t.tv_sec + (double)t.tv_nsec / _NSEC_PER_SEC;
 }
-
 
 /**
  * Return `timespec` time in msec.
@@ -226,14 +200,9 @@ double timespec_sec(
  *
  * @return (t.tv_sec + t.tv_nsec) in msec
  */
-static inline
-long timespec_msec(
-    struct timespec const t
-) {
-    return t.tv_sec * _MSEC_PER_SEC
-        + t.tv_nsec / _USEC_PER_SEC;
+static inline long timespec_msec(struct timespec const t) {
+    return t.tv_sec * _MSEC_PER_SEC + t.tv_nsec / _USEC_PER_SEC;
 }
-
 
 /**
  * Return `timespec` time in usec.
@@ -243,36 +212,24 @@ long timespec_msec(
  *
  * @return (t.tv_sec + t.tv_nsec) in usec
  */
-static inline
-long timespec_usec(
-    struct timespec const t
-) {
-    return t.tv_sec * _USEC_PER_SEC
-        + t.tv_nsec / _MSEC_PER_SEC;
+static inline long timespec_usec(struct timespec const t) {
+    return t.tv_sec * _USEC_PER_SEC + t.tv_nsec / _MSEC_PER_SEC;
 }
-
 
 /**
  * Return `timespec` time in nsec.
  *
  * @return (t.tv_sec + t.tv_nsec) in nsec
  */
-static inline
-long timespec_nsec(
-    struct timespec const t
-) {
-    return t.tv_sec * _NSEC_PER_SEC
-        + t.tv_nsec;
+static inline long timespec_nsec(struct timespec const t) {
+    return t.tv_sec * _NSEC_PER_SEC + t.tv_nsec;
 }
 
-
 /** @} */ /* end group ctimer_timespec */
-
 
 /* ==================================================
  * STOPWATCH API
  * ================================================== */
-
 
 /**
  * @defgroup ctimer_stopwatch Stopwatch API
@@ -282,16 +239,14 @@ long timespec_nsec(
  * @{
  */
 
-
 /**
  * Stopwatch timer struct using `clock_gettime()`.
  */
 typedef struct {
-    struct timespec start;      /**< Stopwatch start time  */
-    struct timespec end;        /**< Stopwatch end time */
-    struct timespec elapsed;    /**< Elapsed/measured time */
+    struct timespec start;   /**< Stopwatch start time  */
+    struct timespec end;     /**< Stopwatch end time */
+    struct timespec elapsed; /**< Elapsed/measured time */
 } ctimer_t;
-
 
 /**
  * Measure elapsed time of `ctimer_t` stopwatch in s+ns and *store* it in the
@@ -311,13 +266,10 @@ typedef struct {
  * @sa ctimer_start
  * @sa ctimer_stop
  */
-static inline
-void ctimer_measure(
-    ctimer_t * t                /**<[in,out] stopwatch pointer */
+static inline void ctimer_measure(ctimer_t* t /**<[in,out] stopwatch pointer */
 ) {
     timespec_sub(&t->elapsed, t->end, t->start);
 }
-
 
 /**
  * Measure elapsed time of `ctimer_t` stopwatch in s+ns and *add* it to the
@@ -337,28 +289,22 @@ void ctimer_measure(
  * @sa ctimer_start
  * @sa ctimer_stop
  */
-static inline
-void ctimer_lap(
-    ctimer_t * t                /**<[in,out] stopwatch pointer */
+static inline void ctimer_lap(ctimer_t* t /**<[in,out] stopwatch pointer */
 ) {
     /* elapsed += end - start */
     timespec_add(&t->elapsed, t->elapsed, t->end);
     timespec_sub(&t->elapsed, t->elapsed, t->start);
 }
 
-
 /**
  * Zero out the `elapsed` timer of a `ctimer_t` stopwatch.
  *
  * @sa ctimer_lap
  */
-static inline
-void ctimer_reset(
-    ctimer_t * t                /**<[in,out] stopwatch pointer */
+static inline void ctimer_reset(ctimer_t* t /**<[in,out] stopwatch pointer */
 ) {
     t->elapsed = (struct timespec){0};
 }
-
 
 /**
  * Start a `ctimer_t` stopwatch.  Sets the the `start` timer of the stopwatch.
@@ -367,13 +313,10 @@ void ctimer_reset(
  * @sa ctimer_measure
  * @sa ctimer_lap
  */
-static inline
-void ctimer_start(
-    ctimer_t * t                /**<[in,out] stopwatch pointer */
+static inline void ctimer_start(ctimer_t* t /**<[in,out] stopwatch pointer */
 ) {
     clock_gettime(CLOCK_MONOTONIC, &t->start);
 }
-
 
 /**
  * Stop a `ctimer_t` stopwatch.  Sets the `end` timer of the stopwatch.
@@ -387,16 +330,13 @@ void ctimer_start(
  * @sa ctimer_measure
  * @sa ctimer_lap
  */
-static inline
-void ctimer_stop(
-    ctimer_t * t                /**<[in,out] stopwatch pointer */
+static inline void ctimer_stop(ctimer_t* t /**<[in,out] stopwatch pointer */
 ) {
     clock_gettime(CLOCK_MONOTONIC, &t->end);
 #ifdef CTIMER_MEASURE_ON_STOP
     ctimer_measure(t);
 #endif
 }
-
 
 /**
  * Print a line with the `elapsed` time of a `ctimer_t` stopwatch in seconds.
@@ -416,10 +356,8 @@ void ctimer_stop(
  * @sa ctimer_measure
  * @sa ctimer_lap
  */
-static inline
-void ctimer_print(
-    ctimer_t const   t,         /**<[in] stopwatch pointer */
-    char     const * label      /**<[in] label/description for printed time */
+static inline void ctimer_print(ctimer_t const t,    /**<[in] stopwatch pointer */
+                                char const*    label /**<[in] label/description for printed time */
 ) {
     if ((label != NULL) && (label[0] != '\0'))
         printf("Time(%s) = ", label);
@@ -429,18 +367,12 @@ void ctimer_print(
     printf("%ld.%09ld sec\n", (long)t.elapsed.tv_sec, t.elapsed.tv_nsec);
 }
 
-
 /** @} */ /* end group ctimer_stopwatch */
-
 
 #ifdef __cplusplus
 } /* end extern "C" */
 #endif
 
-
 /** @} */ /* end group ctimer */
 
-
-#endif  /* __H_CTIMER__ */
-
-
+#endif /* __H_CTIMER__ */

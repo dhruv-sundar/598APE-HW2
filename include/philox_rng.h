@@ -1,8 +1,8 @@
 #ifndef PHILOX_RNG_H
 #define PHILOX_RNG_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 /*
  * Implementation of the Philox counter-based random number generator
@@ -36,23 +36,23 @@ extern "C" {
 typedef struct {
     uint32_t counter[4];
     uint32_t key[2];
-    bool initialized;
+    bool     initialized;
 } philox_state_t;
 
 /* Function prototypes */
-void philox_seed(uint32_t seed);
-void philox_seed_with_key(uint32_t seed, uint32_t key0, uint32_t key1);
-void philox_reset(void);
-void philox_skip(uint64_t count);
-void philox_next4(uint32_t out[4]);
+void     philox_seed(uint32_t seed);
+void     philox_seed_with_key(uint32_t seed, uint32_t key0, uint32_t key1);
+void     philox_reset(void);
+void     philox_skip(uint64_t count);
+void     philox_next4(uint32_t out[4]);
 uint32_t philox_random_uint32(void);
 uint64_t philox_random_uint64(void);
-double philox_random_double(void);
-float philox_random_float(void);
-int32_t philox_random_int32_range(int32_t min, int32_t max);
-int64_t philox_random_int64_range(int64_t min, int64_t max);
-double philox_random_double_range(double min, double max);
-float philox_random_float_range(float min, float max);
+double   philox_random_double(void);
+float    philox_random_float(void);
+int32_t  philox_random_int32_range(int32_t min, int32_t max);
+int64_t  philox_random_int64_range(int64_t min, int64_t max);
+double   philox_random_double_range(double min, double max);
+float    philox_random_float_range(float min, float max);
 
 #ifdef __cplusplus
 }

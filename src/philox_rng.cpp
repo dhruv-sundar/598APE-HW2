@@ -1,35 +1,31 @@
-#include <philox_rng.h>
 #include <math.h>
+#include <philox_rng.h>
 
 /* Global generator state */
 static philox_state_t global_philox_state = {
-    .counter = {1, 2, 3, 3},
-    .key = {56, 712},
-    .initialized = false
-};
+    .counter = {1, 2, 3, 3}, .key = {56, 712}, .initialized = false};
 
 /* Helper function to return the lower and higher 32-bits from two 32-bit
  * integer multiplications. */
-static void multiply_high_low(uint32_t a, uint32_t b, uint32_t* result_low,
-                              uint32_t* result_high) {
+static void multiply_high_low(uint32_t a, uint32_t b, uint32_t* result_low, uint32_t* result_high) {
     uint64_t product = (uint64_t)a * b;
-    *result_low = (uint32_t)product;
-    *result_high = (uint32_t)(product >> 32);
+    *result_low      = (uint32_t)product;
+    *result_high     = (uint32_t)(product >> 32);
 }
 
 /* Helper function for a single round of the underlying Philox algorithm. */
 static void philox_oneround(uint32_t counter[4], uint32_t key[2]) {
     uint32_t lo0, hi0, lo1, hi1;
-    
+
     multiply_high_low(PHILOX_M4x32A, counter[0], &lo0, &hi0);
     multiply_high_low(PHILOX_M4x32B, counter[2], &lo1, &hi1);
-    
+
     uint32_t result[4];
     result[0] = hi1 ^ counter[1] ^ key[0];
     result[1] = lo1;
     result[2] = hi0 ^ counter[3] ^ key[1];
     result[3] = lo0;
-    
+
     counter[0] = result[0];
     counter[1] = result[1];
     counter[2] = result[2];
@@ -43,34 +39,34 @@ static void philox_raisekey(uint32_t key[2]) {
 
 /* Seed the RNG with a single value */
 void philox_seed(uint32_t seed) {
-    global_philox_state.counter[0] = seed;
-    global_philox_state.counter[1] = 2;
-    global_philox_state.counter[2] = 3;
-    global_philox_state.counter[3] = 4;
-    global_philox_state.key[0] = PHILOX_W32A;
-    global_philox_state.key[1] = PHILOX_W32B;
+    global_philox_state.counter[0]  = seed;
+    global_philox_state.counter[1]  = 2;
+    global_philox_state.counter[2]  = 3;
+    global_philox_state.counter[3]  = 4;
+    global_philox_state.key[0]      = PHILOX_W32A;
+    global_philox_state.key[1]      = PHILOX_W32B;
     global_philox_state.initialized = true;
 }
 
 /* Seed the RNG with a value and custom keys */
 void philox_seed_with_key(uint32_t seed, uint32_t key0, uint32_t key1) {
-    global_philox_state.counter[0] = seed;
-    global_philox_state.counter[1] = 2;
-    global_philox_state.counter[2] = 3;
-    global_philox_state.counter[3] = 4;
-    global_philox_state.key[0] = key0;
-    global_philox_state.key[1] = key1;
+    global_philox_state.counter[0]  = seed;
+    global_philox_state.counter[1]  = 2;
+    global_philox_state.counter[2]  = 3;
+    global_philox_state.counter[3]  = 4;
+    global_philox_state.key[0]      = key0;
+    global_philox_state.key[1]      = key1;
     global_philox_state.initialized = true;
 }
 
 /* Reset the RNG to its default state */
 void philox_reset(void) {
-    global_philox_state.counter[0] = 1;
-    global_philox_state.counter[1] = 2;
-    global_philox_state.counter[2] = 3;
-    global_philox_state.counter[3] = 3;
-    global_philox_state.key[0] = 56;
-    global_philox_state.key[1] = 712;
+    global_philox_state.counter[0]  = 1;
+    global_philox_state.counter[1]  = 2;
+    global_philox_state.counter[2]  = 3;
+    global_philox_state.counter[3]  = 3;
+    global_philox_state.key[0]      = 56;
+    global_philox_state.key[1]      = 712;
     global_philox_state.initialized = true;
 }
 
@@ -79,15 +75,15 @@ void philox_skip(uint64_t count) {
     if (!global_philox_state.initialized) {
         philox_reset();
     }
-    
+
     const uint32_t count_lo = (uint32_t)count;
-    uint32_t count_hi = (uint32_t)(count >> 32);
-    
+    uint32_t       count_hi = (uint32_t)(count >> 32);
+
     global_philox_state.counter[0] += count_lo;
     if (global_philox_state.counter[0] < count_lo) {
         ++count_hi;
     }
-    
+
     global_philox_state.counter[1] += count_hi;
     if (global_philox_state.counter[1] < count_hi) {
         if (++global_philox_state.counter[2] == 0) {
@@ -101,13 +97,13 @@ void philox_next4(uint32_t out[4]) {
     if (!global_philox_state.initialized) {
         philox_reset();
     }
-    
+
     for (int i = 0; i < 4; i++) {
         out[i] = global_philox_state.counter[i];
     }
-    
+
     uint32_t key[2] = {global_philox_state.key[0], global_philox_state.key[1]};
-    
+
     for (int i = 0; i < 10; i++) {
         philox_oneround(out, key);
         if (i == 9) {
@@ -154,8 +150,8 @@ int32_t philox_random_int32_range(int32_t min, int32_t max) {
         return min;
     }
     uint32_t range = (uint32_t)(max - min + 1);
-    uint32_t x = philox_random_uint32();
-    uint32_t r = x % range;
+    uint32_t x     = philox_random_uint32();
+    uint32_t r     = x % range;
     return min + (int32_t)r;
 }
 
@@ -165,8 +161,8 @@ int64_t philox_random_int64_range(int64_t min, int64_t max) {
         return min;
     }
     uint64_t range = (uint64_t)(max - min + 1);
-    uint64_t x = philox_random_uint64();
-    uint64_t r = x % range;
+    uint64_t x     = philox_random_uint64();
+    uint64_t r     = x % range;
     return min + (int64_t)r;
 }
 

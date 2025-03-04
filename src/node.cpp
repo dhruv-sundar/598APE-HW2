@@ -3,108 +3,115 @@
 #include <memory>
 #include <stdexcept>
 
-#define THROW(fmt, ...)                                                        \
-  do {                                                                         \
-    int size1 = std::snprintf(                                                 \
-        nullptr, 0, "exception occurred! file=%s line=%d: ", __FILE__,         \
-        __LINE__);                                                             \
-    int size2 = std::snprintf(nullptr, 0, fmt, ##__VA_ARGS__);                 \
-    if (size1 < 0 || size2 < 0)                                                \
-      throw std::runtime_error("Error in snprintf, cannot handle exception."); \
-    auto size = size1 + size2 + 1; /* +1 for final '\0' */                     \
-    auto buf = std::make_unique<char[]>(size_t(size));                         \
-    std::snprintf(buf.get(), size1 + 1 /* +1 for '\0' */,                      \
-                  "exception occurred! file=%s line=%d: ", __FILE__,           \
-                  __LINE__);                                                   \
-    std::snprintf(buf.get() + size1, size2 + 1 /* +1 for '\0' */, fmt,         \
-                  ##__VA_ARGS__);                                              \
-    std::string msg(buf.get(),                                                 \
-                    buf.get() + size - 1); /* -1 to remove final '\0' */       \
-    throw std::runtime_error(msg);                                             \
-  } while (0)
+#define THROW(fmt, ...)                                                                            \
+    do {                                                                                           \
+        int size1 = std::snprintf(nullptr, 0, "exception occurred! file=%s line=%d: ", __FILE__,   \
+                                  __LINE__);                                                       \
+        int size2 = std::snprintf(nullptr, 0, fmt, ##__VA_ARGS__);                                 \
+        if (size1 < 0 || size2 < 0)                                                                \
+            throw std::runtime_error("Error in snprintf, cannot handle exception.");               \
+        auto size = size1 + size2 + 1; /* +1 for final '\0' */                                     \
+        auto buf  = std::make_unique<char[]>(size_t(size));                                        \
+        std::snprintf(buf.get(), size1 + 1 /* +1 for '\0' */,                                      \
+                      "exception occurred! file=%s line=%d: ", __FILE__, __LINE__);                \
+        std::snprintf(buf.get() + size1, size2 + 1 /* +1 for '\0' */, fmt, ##__VA_ARGS__);         \
+        std::string msg(buf.get(), buf.get() + size - 1); /* -1 to remove final '\0' */            \
+        throw std::runtime_error(msg);                                                             \
+    } while (0)
 
 /** macro to check for a conditional and assert on failure */
-#define ASSERT(check, fmt, ...)                                                \
-  do {                                                                         \
-    if (!(check))                                                              \
-      THROW(fmt, ##__VA_ARGS__);                                               \
-  } while (0)
+#define ASSERT(check, fmt, ...)                                                                    \
+    do {                                                                                           \
+        if (!(check))                                                                              \
+            THROW(fmt, ##__VA_ARGS__);                                                             \
+    } while (0)
 
 namespace genetic {
 
-const int node::kInvalidFeatureId = -1;
+    const int node::kInvalidFeatureId = -1;
 
-node::node() {}
+    node::node() {
+    }
 
-node::node(node::type ft) : t(ft) {
-  ASSERT(is_nonterminal(),
-         "node: ctor with `type` argument expects functions type only!");
-  u.fid = kInvalidFeatureId;
-}
+    node::node(node::type ft) : t(ft) {
+        ASSERT(is_nonterminal(), "node: ctor with `type` argument expects functions type only!");
+        u.fid = kInvalidFeatureId;
+    }
 
-node::node(int fid) : t(node::type::variable) { u.fid = fid; }
+    node::node(int fid) : t(node::type::variable) {
+        u.fid = fid;
+    }
 
-node::node(float val) : t(node::type::constant) { u.val = val; }
+    node::node(float val) : t(node::type::constant) {
+        u.val = val;
+    }
 
-node::node(const node &src) : t(src.t), u(src.u) {}
+    node::node(const node& src) : t(src.t), u(src.u) {
+    }
 
-node &node::operator=(const node &src) {
-  t = src.t;
-  u = src.u;
-  return *this;
-}
+    node& node::operator=(const node& src) {
+        t = src.t;
+        u = src.u;
+        return *this;
+    }
 
-bool node::is_terminal() const { return detail::is_terminal(t); }
+    bool node::is_terminal() const {
+        return detail::is_terminal(t);
+    }
 
-bool node::is_nonterminal() const { return detail::is_nonterminal(t); }
+    bool node::is_nonterminal() const {
+        return detail::is_nonterminal(t);
+    }
 
-int node::arity() const { return detail::arity(t); }
+    int node::arity() const {
+        return detail::arity(t);
+    }
 
-#define CASE(str, val)                                                         \
-  if (#val == str)                                                             \
-  return node::type::val
+#define CASE(str, val)                                                                             \
+    if (#val == str)                                                                               \
+    return node::type::val
 
-node::type node::from_str(const std::string &ntype) {
-  CASE(ntype, variable);
-  CASE(ntype, constant);
-  // note: keep the case statements in alphabetical order under each category of
-  // operators.
-  // binary operators
-  CASE(ntype, add);
-  CASE(ntype, atan2);
-  CASE(ntype, div);
-  CASE(ntype, fdim);
-  CASE(ntype, max);
-  CASE(ntype, min);
-  CASE(ntype, mul);
-  CASE(ntype, pow);
-  CASE(ntype, sub);
-  // unary operators
-  CASE(ntype, abs);
-  CASE(ntype, acos);
-  CASE(ntype, asin);
-  CASE(ntype, atan);
-  CASE(ntype, acosh);
-  CASE(ntype, asinh);
-  CASE(ntype, atanh);
-  CASE(ntype, cbrt);
-  CASE(ntype, cos);
-  CASE(ntype, cosh);
-  CASE(ntype, cube);
-  CASE(ntype, exp);
-  CASE(ntype, inv);
-  CASE(ntype, log);
-  CASE(ntype, neg);
-  CASE(ntype, rcbrt);
-  CASE(ntype, rsqrt);
-  CASE(ntype, sq);
-  CASE(ntype, sqrt);
-  CASE(ntype, sin);
-  CASE(ntype, sinh);
-  CASE(ntype, tan);
-  CASE(ntype, tanh);
-  ASSERT(false, "node::from_str: Bad type passed '%s'!", ntype.c_str());
-}
+    node::type node::from_str(const std::string& ntype) {
+        CASE(ntype, variable);
+        CASE(ntype, constant);
+        // note: keep the case statements in alphabetical order under each category of
+        // operators.
+        // binary operators
+        CASE(ntype, add);
+        CASE(ntype, atan2);
+        CASE(ntype, div);
+        CASE(ntype, fdim);
+        CASE(ntype, max);
+        CASE(ntype, min);
+        CASE(ntype, mul);
+        CASE(ntype, pow);
+        CASE(ntype, sub);
+        // unary operators
+        CASE(ntype, abs);
+        CASE(ntype, acos);
+        CASE(ntype, asin);
+        CASE(ntype, atan);
+        CASE(ntype, acosh);
+        CASE(ntype, asinh);
+        CASE(ntype, atanh);
+        CASE(ntype, cbrt);
+        CASE(ntype, cos);
+        CASE(ntype, cosh);
+        CASE(ntype, cube);
+        CASE(ntype, exp);
+        CASE(ntype, inv);
+        CASE(ntype, log);
+        CASE(ntype, neg);
+        CASE(ntype, rcbrt);
+        CASE(ntype, rsqrt);
+        CASE(ntype, sq);
+        CASE(ntype, sqrt);
+        CASE(ntype, sin);
+        CASE(ntype, sinh);
+        CASE(ntype, tan);
+        CASE(ntype, tanh);
+        ASSERT(false, "node::from_str: Bad type passed '%s'!", ntype.c_str());
+    }
 #undef CASE
 
 } // namespace genetic
