@@ -1,5 +1,5 @@
 CXX := g++
-CXXFLAGS := -std=c++17 -Wall -Wextra -I include -I. -fopenmp
+CXXFLAGS := -std=c++17 -Wall -Wextra -I include -I. -fopenmp -lstdc++ -lm
 
 # Directories
 SRC_DIR := src
