@@ -227,7 +227,6 @@ void run_symbolic_regression(const std::string& dataset_file) {
     // Train the model
     genetic::symFit(X_train_flat.data(), y_train.data(), sample_weights.data(),
                     X_train.size(),    // Number of rows
-                    X_train[0].size(), // Number of columns
                     params, final_programs, history);
 
     // Debug printing
@@ -361,7 +360,6 @@ void run_symbolic_classification(const std::string& dataset_file) {
     // Train the model
     genetic::symFit(X_train_flat.data(), y_train.data(), sample_weights.data(),
                     X_train.size(),    // Number of rows
-                    X_train[0].size(), // Number of columns
                     params, final_programs, history);
 
     // // print and check programs from hsitory
@@ -417,7 +415,7 @@ void run_symbolic_classification(const std::string& dataset_file) {
     delete[] final_programs;
 }
 
-int main(int argc, char* argv[]) {
+int main([[maybe_unused]] int argc, char* argv[]) {
     try {
         // Default datasets
         std::string regression_dataset     = "benchmark/diabetes.csv";

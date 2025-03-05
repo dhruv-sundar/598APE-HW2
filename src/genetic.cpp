@@ -351,7 +351,7 @@ namespace genetic {
     }
 
     void symFit(const float* input, const float* labels, const float* sample_weights,
-                const int n_rows, const int n_cols, param& params, program_t& final_progs,
+                const int n_rows, param& params, program_t& final_progs,
                 std::vector<std::vector<program>>& history) {
         // Update arity map in params - Need to do this only here, as all operations
         // will call Fit at least once
@@ -498,12 +498,12 @@ namespace genetic {
         }
     }
 
-    void symTransform(const float* input, const param& params, const program_t& final_progs,
-                      const int n_rows, const int n_cols, float* output) {
-        // cudaStream_t stream = handle.get_stream();
-        // Execute final_progs(ordered by fitness) on input
-        // output of size [n_rows,hall_of_fame]
-        execute(final_progs, n_rows, params.n_components, input, output);
-    }
+    // void symTransform(const float* input, const param& params, const program_t& final_progs,
+    //                   const int n_rows, const int n_cols, float* output) {
+    //     // cudaStream_t stream = handle.get_stream();
+    //     // Execute final_progs(ordered by fitness) on input
+    //     // output of size [n_rows,hall_of_fame]
+    //     execute(final_progs, n_rows, params.n_components, input, output);
+    // }
 
 } // namespace genetic

@@ -54,8 +54,8 @@ namespace genetic {
     }
 
     program::program()
-        : len(0), depth(0), raw_fitness_(0.0f), metric(metric_t::mse), mut_type(mutation_t::none),
-          nodes(nullptr) {
+        : nodes(nullptr), len(0), depth(0), raw_fitness_(0.0f), metric(metric_t::mse), mut_type(mutation_t::none)
+            {
     }
 
     program::~program() {
@@ -382,7 +382,7 @@ namespace genetic {
         }
     }
 
-    void crossover(const program& prog, const program& donor, program& p_out, const param& params,
+    void crossover(const program& prog, const program& donor, program& p_out, [[maybe_unused]] const param& params,
                    PhiloxEngine& rng) {
         // Get a random subtree of prog to replace
         std::pair<int, int> prog_slice = get_subtree(prog.nodes, prog.len, rng);
@@ -398,9 +398,7 @@ namespace genetic {
         int donor_start  = 0;
         int donor_end    = donor.len;
         int output_depth = 0;
-        int iter         = 0;
         do {
-            ++iter;
             // Get donor subtree
             std::pair<int, int> donor_slice =
                 get_subtree(donor.nodes + donor_start, donor_end - donor_start, rng);
@@ -443,7 +441,7 @@ namespace genetic {
         crossover(prog, new_program, p_out, params, rng);
     }
 
-    void hoist_mutation(const program& prog, program& p_out, const param& params,
+    void hoist_mutation(const program& prog, program& p_out, [[maybe_unused]] const param& params,
                         PhiloxEngine& rng) {
         // Replace program subtree with a random sub-subtree
 

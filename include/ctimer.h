@@ -303,7 +303,7 @@ static inline void ctimer_lap(ctimer_t* t /**<[in,out] stopwatch pointer */
  */
 static inline void ctimer_reset(ctimer_t* t /**<[in,out] stopwatch pointer */
 ) {
-    t->elapsed = (struct timespec){0};
+    t->elapsed = (struct timespec){0, 0};
 }
 
 /**

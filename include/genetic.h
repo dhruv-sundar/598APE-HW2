@@ -40,7 +40,7 @@ namespace genetic {
      * function.
      */
     void symFit(const float* input, const float* labels, const float* sample_weights,
-                const int n_rows, const int n_cols, param& params, program_t& final_progs,
+                const int n_rows, param& params, program_t& final_progs,
                 std::vector<std::vector<program>>& history);
 
     /**
@@ -93,7 +93,7 @@ namespace genetic {
      * @param n_cols      number of columns of the feature matrix
      * @param output      device pointer to transformed input
      */
-    void symTransform(const float* input, const param& params, const program_t& final_progs,
-                      const int n_rows, const int n_cols, float* output);
+    // void symTransform(const float* input, const param& params, const program_t& final_progs,
+    //                   const int n_rows, const int n_cols, float* output);
 
 } // namespace genetic

@@ -1,5 +1,6 @@
 CXX := g++
-CXXFLAGS := -std=c++17 -Wall -Wextra -I include -I. -fopenmp -lstdc++ -lm -O2 -march=native
+CXXFLAGS := -std=c++17 -Wall -Wextra -I include -I. -fopenmp -O2 -march=native
+LDFLAGS := -lstdc++ -lm
 
 # Directories
 SRC_DIR := src
@@ -32,7 +33,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 # build benchmark lib 
 $(BENCH_BIN): $(BENCH_SRC) $(OBJS)
 	@echo "Building benchmark program..."
-	@$(CXX) $(CXXFLAGS) $< $(OBJS) -o $@ 
+	@$(CXX) $(CXXFLAGS) $(LDFLAGS) $< $(OBJS) -o $@ 
 
 # Clean build files
 clean:
