@@ -370,7 +370,7 @@ namespace genetic {
                     int ar = curr.arity();
                     // CUML_LOG_DEBUG("Arity is %d, curr function is
                     // %d",ar,static_cast<std::underlying_type<node::type>::type>(curr.t));
-                    std::vector<node::type>              fset = params.arity_set.at(ar);
+                    std::vector<node::type>              fset = params.arity_set[ar];
                     uniform_int_distribution_custom<int> dist_fset(0, fset.size() - 1);
                     int                                  choice = dist_fset(rng);
                     curr                                        = node(fset[choice]);

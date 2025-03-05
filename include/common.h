@@ -116,8 +116,8 @@ namespace genetic {
                                              node::type::sub};
 
         /** map of functions ordered by their arity */
-        std::map<int, std::vector<node::type>> arity_set{
-            {2, {node::type::add, node::type::mul, node::type::div, node::type::sub}}};
+        std::vector<node::type> arity_set[3]{{}, {},
+            {node::type::add, node::type::mul, node::type::div, node::type::sub}};
         /** transformation function to class probabilities (classification-only) */
         transformer_t transformer = transformer_t::sigmoid;
         /** fitness metric */

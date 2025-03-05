@@ -200,10 +200,10 @@ void run_symbolic_regression(const std::string& dataset_file) {
                                node::type::abs, node::type::sin,  node::type::cos,
                                node::type::exp, node::type::fdim, node::type::log};
         // Arity set
-        params.arity_set = {
-            {1,
-             {node::type::abs, node::type::sin, node::type::cos, node::type::exp, node::type::log}},
-            {2, {node::type::add, node::type::sub, node::type::mul, node::type::fdim}}};
+        params.arity_set[1] =
+            {node::type::abs, node::type::sin, node::type::cos, node::type::exp, node::type::log};
+        params.arity_set[2] =
+            {node::type::add, node::type::sub, node::type::mul, node::type::fdim};
     }
 
     params.metric                = genetic::metric_t::mse; // Use MSE as the fitness metric
@@ -333,9 +333,10 @@ void run_symbolic_classification(const std::string& dataset_file) {
 
     // Don't worry if you see stuff like sqrt(-5) -> we consider only the absolute
     // value in that case
-    params.arity_set = {
-        {1, {node::type::abs, node::type::sin, node::type::cos, node::type::sq, node::type::sqrt}},
-        {2, {node::type::add, node::type::sub, node::type::mul, node::type::fdim}}};
+    params.arity_set[1] =
+        {node::type::abs, node::type::sin, node::type::cos, node::type::sq, node::type::sqrt};
+    params.arity_set[2] =
+        {node::type::add, node::type::sub, node::type::mul, node::type::fdim};
 
     params.metric      = genetic::metric_t::logloss;      // Use log loss forclassification
     params.transformer = genetic::transformer_t::sigmoid; // Use sigmoid for binary classification
