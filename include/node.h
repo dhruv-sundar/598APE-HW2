@@ -23,7 +23,7 @@ namespace genetic {
          * @brief All possible types of nodes. For simplicity, all the terminal and
          *        non-terminal types are clubbed together
          */
-        enum class type : uint32_t {
+        enum class type : uint8_t {
             variable = 0,
             constant,
 
@@ -144,6 +144,11 @@ namespace genetic {
             /** if the node is `constant` type, then this is the value of the node */
             float val;
         } u;
+        /** arity of the node */
+        struct {
+            uint8_t arity_ : 2;       // 2 bits for 0-2
+            uint8_t is_terminal_ : 1; // 1 bit for bool
+        } flags;
     }; // struct node
 
 } // namespace genetic

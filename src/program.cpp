@@ -25,17 +25,15 @@ namespace genetic {
         for (uint64_t pid = 0; pid < n_progs; ++pid) {
             for (uint64_t row_id = 0; row_id < n_rows; ++row_id) {
                 stack<float, MaxSize> eval_stack;
-                program&              curr_p = d_progs[pid]; // Current program
-
-                int end = curr_p.len - 1;
+                const program&        curr_p = d_progs[pid]; // Current program
 
                 float res   = 0.0f;
                 float in[2] = {0.0f, 0.0f};
 
-                while (end >= 0) {
-                    const node& curr_node = curr_p.nodes[end];
-                    if (detail::is_nonterminal(curr_node.t)) {
-                        int ar = detail::arity(curr_node.t);
+                for (int i = curr_p.len - 1; i >= 0; --i) {
+                    const node& curr_node = curr_p.nodes[i];
+                    if (curr_node.flags.is_terminal_ == false) {
+                        int ar = curr_node.flags.arity_;
                         in[0]  = eval_stack.pop(); // Min arity of function is 1
                         if (ar > 1)
                             in[1] = eval_stack.pop();
@@ -43,7 +41,6 @@ namespace genetic {
                     res = detail::evaluate_node_lookup(curr_node, data, n_rows, row_id, in);
                     // res = detail::evaluate_node(*curr_node, data, n_rows, row_id, in);
                     eval_stack.push(res);
-                    end--;
                 }
 
                 // Outputs stored in col-major format
@@ -58,6 +55,7 @@ namespace genetic {
     }
 
     program::~program() {
+        // delete[] nodes;
         // delete[] nodes;
     }
 
@@ -77,6 +75,7 @@ namespace genetic {
         mut_type     = src.mut_type;
 
         // Copy nodes
+        // delete[] nodes;
         // delete[] nodes;
         nodes = std::make_unique<node[]>(len);
         std::copy(src.nodes.get(), src.nodes.get() + src.len, nodes.get());
@@ -462,6 +461,7 @@ namespace genetic {
         p_out.len    = (prog_start) + (sub_end - sub_start) + (prog.len - prog_end);
         p_out.nodes  = std::make_unique<node[]>(p_out.len);
         p_out.metric = prog.metric;
+
 
         // Copy node slices using std::copy
         std::copy(prog.nodes.get(), prog.nodes.get() + prog_start, p_out.nodes.get());
