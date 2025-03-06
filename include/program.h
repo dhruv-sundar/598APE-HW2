@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "philox_engine.h"
+#include <memory>
 #include <random>
 
 namespace genetic {
@@ -49,7 +50,7 @@ namespace genetic {
          */
         program& operator=(const program& src);
 
-        node* nodes;
+        std::unique_ptr<node[]> nodes;
         /** total number of nodes in this AST */
         int len;
         /** maximum depth of this AST */
