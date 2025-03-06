@@ -137,6 +137,25 @@ namespace utils {
 
 using namespace genetic;
 
+std::pair<ssize_t, ssize_t> selectTop2(genetic::program* programs, int size) {
+    ssize_t idx1 = 0, idx2 = 0;
+    float   rf1 = programs[0].raw_fitness_;
+    float   rf2 = programs[0].raw_fitness_;
+    for (int i = 1; i < size; i++) {
+        float rf = programs[i].raw_fitness_;
+        if (rf < rf1) {
+            rf2  = rf1;
+            idx2 = idx1;
+            rf1  = rf;
+            idx1 = i;
+        } else if (rf < rf2) {
+            rf2  = rf;
+            idx2 = i;
+        }
+    }
+    return std::make_pair(idx1, idx2);
+}
+
 void insertionSortPrograms(genetic::program* programs, int size) {
     for (int i = 1; i < size; i++) {
         genetic::program key(programs[i]);
@@ -200,10 +219,9 @@ void run_symbolic_regression(const std::string& dataset_file) {
                                node::type::abs, node::type::sin,  node::type::cos,
                                node::type::exp, node::type::fdim, node::type::log};
         // Arity set
-        params.arity_set[1] =
-            {node::type::abs, node::type::sin, node::type::cos, node::type::exp, node::type::log};
-        params.arity_set[2] =
-            {node::type::add, node::type::sub, node::type::mul, node::type::fdim};
+        params.arity_set[1] = {node::type::abs, node::type::sin, node::type::cos, node::type::exp,
+                               node::type::log};
+        params.arity_set[2] = {node::type::add, node::type::sub, node::type::mul, node::type::fdim};
     }
 
     params.metric                = genetic::metric_t::mse; // Use MSE as the fitness metric
@@ -226,7 +244,7 @@ void run_symbolic_regression(const std::string& dataset_file) {
 
     // Train the model
     genetic::symFit(X_train_flat.data(), y_train.data(), sample_weights.data(),
-                    X_train.size(),    // Number of rows
+                    X_train.size(), // Number of rows
                     params, final_programs, history);
 
     // Debug printing
@@ -236,13 +254,16 @@ void run_symbolic_regression(const std::string& dataset_file) {
     // }
 
     // Predict on top 2 candidates
-    insertionSortPrograms(final_programs, params.population_size);
+    // insertionSortPrograms(final_programs, params.population_size);
+    auto [idx1, idx2] = selectTop2(final_programs, params.population_size);
 
     std::vector<float> y_pred1(X_test.size());
-    genetic::symRegPredict(X_test_flat.data(), X_test.size(), &final_programs[0], y_pred1.data());
+    genetic::symRegPredict(X_test_flat.data(), X_test.size(), &final_programs[idx1],
+                           y_pred1.data());
 
     std::vector<float> y_pred2(X_test.size());
-    genetic::symRegPredict(X_test_flat.data(), X_test.size(), &final_programs[1], y_pred2.data());
+    genetic::symRegPredict(X_test_flat.data(), X_test.size(), &final_programs[idx2],
+                           y_pred2.data());
 
     // Calculate MSE on test set
     float mse  = utils::mean_squared_error(y_test, y_pred1);
@@ -332,10 +353,9 @@ void run_symbolic_classification(const std::string& dataset_file) {
 
     // Don't worry if you see stuff like sqrt(-5) -> we consider only the absolute
     // value in that case
-    params.arity_set[1] =
-        {node::type::abs, node::type::sin, node::type::cos, node::type::sq, node::type::sqrt};
-    params.arity_set[2] =
-        {node::type::add, node::type::sub, node::type::mul, node::type::fdim};
+    params.arity_set[1] = {node::type::abs, node::type::sin, node::type::cos, node::type::sq,
+                           node::type::sqrt};
+    params.arity_set[2] = {node::type::add, node::type::sub, node::type::mul, node::type::fdim};
 
     params.metric      = genetic::metric_t::logloss;      // Use log loss forclassification
     params.transformer = genetic::transformer_t::sigmoid; // Use sigmoid for binary classification
@@ -359,7 +379,7 @@ void run_symbolic_classification(const std::string& dataset_file) {
 
     // Train the model
     genetic::symFit(X_train_flat.data(), y_train.data(), sample_weights.data(),
-                    X_train.size(),    // Number of rows
+                    X_train.size(), // Number of rows
                     params, final_programs, history);
 
     // // print and check programs from hsitory
@@ -370,13 +390,15 @@ void run_symbolic_classification(const std::string& dataset_file) {
     // }
 
     // Predict classes for best 2 programs acc to training
-    insertionSortPrograms(final_programs, params.population_size);
+    // insertionSortPrograms(final_programs, params.population_size);
+    auto [idx1, idx2] = selectTop2(final_programs, params.population_size);
+
     std::vector<float> y_pred1(X_test.size());
-    genetic::symClfPredict(X_test_flat.data(), X_test.size(), params, &final_programs[0],
+    genetic::symClfPredict(X_test_flat.data(), X_test.size(), params, &final_programs[idx1],
                            y_pred1.data());
 
     std::vector<float> y_pred2(X_test.size());
-    genetic::symClfPredict(X_test_flat.data(), X_test.size(), params, &final_programs[1],
+    genetic::symClfPredict(X_test_flat.data(), X_test.size(), params, &final_programs[idx2],
                            y_pred2.data());
 
     float acc  = utils::accuracy(y_test, y_pred1);

@@ -356,23 +356,23 @@ namespace genetic {
         // Update arity map in params - Need to do this only here, as all operations
         // will call Fit at least once
         // for (auto f : params.function_set) {
-            // int ar = 1;
-            // if (node::type::binary_begin <= f && f <= node::type::binary_end) {
-            //     ar = 2;
-            // }
+        // int ar = 1;
+        // if (node::type::binary_begin <= f && f <= node::type::binary_end) {
+        //     ar = 2;
+        // }
 
-            // if (params.arity_set.find(ar) == params.arity_set.end()) {
-            //     // Create map entry for current arity
-            //     std::vector<node::type> vec_f(1, f);
-            //     params.arity_set.insert(std::make_pair(ar, vec_f));
-            // } else {
-            //     // Insert into map
-            //     std::vector<node::type> vec_f = params.arity_set.at(ar);
-            //     if (std::find(vec_f.begin(), vec_f.end(), f) == vec_f.end()) {
-            //         params.arity_set.at(ar).push_back(f);
-            //     }
-            // }
-            // params.arity_set[ar].push_back(f);
+        // if (params.arity_set.find(ar) == params.arity_set.end()) {
+        //     // Create map entry for current arity
+        //     std::vector<node::type> vec_f(1, f);
+        //     params.arity_set.insert(std::make_pair(ar, vec_f));
+        // } else {
+        //     // Insert into map
+        //     std::vector<node::type> vec_f = params.arity_set.at(ar);
+        //     if (std::find(vec_f.begin(), vec_f.end(), f) == vec_f.end()) {
+        //         params.arity_set.at(ar).push_back(f);
+        //     }
+        // }
+        // params.arity_set[ar].push_back(f);
         // }
 
         // Check terminalRatio to dynamically set it
@@ -390,7 +390,7 @@ namespace genetic {
         std::vector<float> h_fitness(params.population_size, 0.0f);
 
         PhiloxEngine h_gen_engine(params.random_state);
-        
+
         uniform_int_distribution_custom<int> seed_dist;
 
         mut_probs[0] = params.p_crossover;

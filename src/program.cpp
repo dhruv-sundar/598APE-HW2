@@ -25,9 +25,9 @@ namespace genetic {
         for (uint64_t pid = 0; pid < n_progs; ++pid) {
             for (uint64_t row_id = 0; row_id < n_rows; ++row_id) {
                 stack<float, MaxSize> eval_stack;
-                program &             curr_p = d_progs[pid]; // Current program
+                program&              curr_p = d_progs[pid]; // Current program
 
-                int   end       = curr_p.len - 1;
+                int end = curr_p.len - 1;
 
                 float res   = 0.0f;
                 float in[2] = {0.0f, 0.0f};
@@ -58,7 +58,7 @@ namespace genetic {
     }
 
     program::~program() {
-        //delete[] nodes;
+        // delete[] nodes;
     }
 
     program::program(const program& src)
@@ -77,7 +77,7 @@ namespace genetic {
         mut_type     = src.mut_type;
 
         // Copy nodes
-        //delete[] nodes;
+        // delete[] nodes;
         nodes = std::make_unique<node[]>(len);
         std::copy(src.nodes.get(), src.nodes.get() + src.len, nodes.get());
 
@@ -462,7 +462,7 @@ namespace genetic {
         p_out.len    = (prog_start) + (sub_end - sub_start) + (prog.len - prog_end);
         p_out.nodes  = std::make_unique<node[]>(p_out.len);
         p_out.metric = prog.metric;
- 
+
         // Copy node slices using std::copy
         std::copy(prog.nodes.get(), prog.nodes.get() + prog_start, p_out.nodes.get());
         std::copy(prog.nodes.get() + sub_start, prog.nodes.get() + sub_end,
