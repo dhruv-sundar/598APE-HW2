@@ -216,10 +216,10 @@ namespace genetic {
                 if (prog.nodes[i].t == node::type::variable) {
                     // variable
                     eqn += "X";
-                    eqn += std::to_string(prog.nodes[i].u.fid);
+                    eqn += std::to_string(prog.nodes[i].fid);
                 } else {
                     // const
-                    eqn += std::to_string(prog.nodes[i].u.val);
+                    eqn += std::to_string(prog.nodes[i].val);
                 }
 
                 int end_elem = ar_stack.top();

@@ -35,31 +35,30 @@ namespace genetic {
 
     node::node(node::type ft) : t(ft) {
         ASSERT(is_nonterminal(), "node: ctor with `type` argument expects functions type only!");
-        u.fid              = kInvalidFeatureId;
+        fid              = kInvalidFeatureId;
         flags.arity_       = detail::arity(ft);
         flags.is_terminal_ = detail::is_terminal(ft);
     }
 
-    node::node(int fid) : t(node::type::variable) {
-        u.fid              = fid;
+    node::node(int fid) : t(node::type::variable), fid(fid) {
         flags.arity_       = detail::arity(t);
         flags.is_terminal_ = detail::is_terminal(t);
     }
 
-    node::node(float val) : t(node::type::constant) {
-        u.val              = val;
+    node::node(float val) : t(node::type::constant), val(val) {
         flags.arity_       = detail::arity(t);
         flags.is_terminal_ = detail::is_terminal(t);
     }
 
-    node::node(const node& src) : t(src.t), u(src.u) {
+    node::node(const node& src) : t(src.t), fid(src.fid), val(src.val) {
         flags.arity_       = src.flags.arity_;
         flags.is_terminal_ = src.flags.is_terminal_;
     }
 
     node& node::operator=(const node& src) {
         t                  = src.t;
-        u                  = src.u;
+        fid                 = src.fid;
+        val                  = src.val;
         flags.arity_       = src.flags.arity_;
         flags.is_terminal_ = src.flags.is_terminal_;
         return *this;

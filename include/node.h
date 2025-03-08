@@ -135,15 +135,18 @@ namespace genetic {
 
         /** node type */
         type t;
-        union {
-            /**
-             * if the node is `variable` type, then this is the column id to be used to
-             * fetch its value, from the input dataset
-             */
-            int fid;
-            /** if the node is `constant` type, then this is the value of the node */
-            float val;
-        } u;
+        // union {
+            
+            
+        // } u;
+        // Omitting union because 12 vs. 16 bytes is not that big, and now nodes won't split a cacheline
+        /**
+         * if the node is `variable` type, then this is the column id to be used to
+         * fetch its value, from the input dataset
+         */
+        int fid;
+        /** if the node is `constant` type, then this is the value of the node */
+        float val;
         /** arity of the node */
         struct {
             uint8_t arity_ : 2;       // 2 bits for 0-2
@@ -151,4 +154,5 @@ namespace genetic {
         } flags;
     }; // struct node
 
+    constexpr int _ = sizeof(node);
 } // namespace genetic
