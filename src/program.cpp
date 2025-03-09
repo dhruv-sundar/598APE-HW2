@@ -21,10 +21,11 @@ namespace genetic {
     template <int MaxSize = MAX_STACK_SIZE>
     void execute_kernel(const program_t d_progs, const float* data, float* y_pred,
                         const uint64_t n_rows, const uint64_t n_progs) {
-#pragma omp parallel for schedule(dynamic)
+        stack<float, MaxSize> eval_stack;
+#pragma omp parallel for schedule(dynamic) private(eval_stack)
         for (uint64_t pid = 0; pid < n_progs; ++pid) {
             for (uint64_t row_id = 0; row_id < n_rows; ++row_id) {
-                stack<float, MaxSize> eval_stack;
+                eval_stack.clear();
                 const program&        curr_p = d_progs[pid]; // Current program
 
                 // float res   = 0.0f;

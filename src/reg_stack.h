@@ -14,13 +14,16 @@ namespace genetic {
     template <typename DataT, int MaxSize> struct stack {
         explicit stack() : elements_(0) {
             // could replace with memset
-            for (int i = 0; i < MaxSize; ++i) {
-                regs_[i] = DataT(0);
-            }
+            // for (int i = 0; i < MaxSize; ++i) {
+            //     regs_[i] = DataT(0);
+            // }
         }
 
         /** Checks if the stack is empty */
         inline bool empty() const { return elements_ == 0; }
+
+        /** Empties the stack */
+        inline void clear() { elements_ = 0; }
 
         /** Current number of elements in the stack */
         inline int size() const { return elements_; }
@@ -74,8 +77,10 @@ namespace genetic {
         }
 
     private:
+        alignas(64) DataT regs_[MaxSize];
         int   elements_;
-        DataT regs_[MaxSize];
     }; // struct stack
+
+// constexpr auto _ = alignof(stack<float, 20>);
 
 } // namespace genetic
