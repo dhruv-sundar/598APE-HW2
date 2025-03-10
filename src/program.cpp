@@ -27,13 +27,13 @@ namespace genetic {
                 stack<float, MaxSize> eval_stack;
                 const program&        curr_p = d_progs[pid]; // Current program
 
-                float res   = 0.0f;
-                float in1   = 0.0f;
-                float in2   = 0.0f;
+                float res = 0.0f;
+                float in1 = 0.0f;
+                float in2 = 0.0f;
 
                 for (int i = curr_p.len - 1; i >= 0; --i) {
                     const node& curr_node = curr_p.nodes[i];
-                    if (curr_node.flags.is_terminal_ == false) {
+                    if (detail::is_nonterminal(static_cast<node::type>(curr_node.flags.type_))) {
                         int ar = curr_node.flags.arity_;
                         in1    = eval_stack.pop(); // Min arity of function is 1
                         if (ar > 1)
@@ -45,6 +45,8 @@ namespace genetic {
                 }
 
                 // Outputs stored in col-major format
+                // high rate of write misses, can cause false sharing!!! but threads are operating
+                // every pid
                 y_pred[pid * n_rows + row_id] = eval_stack.pop();
             }
         }
@@ -462,7 +464,6 @@ namespace genetic {
         p_out.len    = (prog_start) + (sub_end - sub_start) + (prog.len - prog_end);
         p_out.nodes  = std::make_unique<node[]>(p_out.len);
         p_out.metric = prog.metric;
-
 
         // Copy node slices using std::copy
         std::copy(prog.nodes.get(), prog.nodes.get() + prog_start, p_out.nodes.get());

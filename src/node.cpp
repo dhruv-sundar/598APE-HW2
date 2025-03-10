@@ -33,48 +33,48 @@ namespace genetic {
     node::node() {
     }
 
-    node::node(node::type ft) : t(ft) {
+    node::node(node::type ft) {
+        flags.type_ = static_cast<uint8_t>(ft);
         ASSERT(is_nonterminal(), "node: ctor with `type` argument expects functions type only!");
         u.fid              = kInvalidFeatureId;
         flags.arity_       = detail::arity(ft);
-        flags.is_terminal_ = detail::is_terminal(ft);
     }
 
-    node::node(int fid) : t(node::type::variable) {
-        u.fid              = fid;
-        flags.arity_       = detail::arity(t);
-        flags.is_terminal_ = detail::is_terminal(t);
+    node::node(int fid) {
+        flags.type_ = static_cast<uint8_t>(node::type::variable);
+        u.fid       = fid;
+        flags.arity_ = detail::arity(static_cast<node::type>(flags.type_));
     }
 
-    node::node(float val) : t(node::type::constant) {
-        u.val              = val;
-        flags.arity_       = detail::arity(t);
-        flags.is_terminal_ = detail::is_terminal(t);
+    node::node(float val) {
+        flags.type_ = static_cast<uint8_t>(node::type::constant);
+        u.val       = val;
+        flags.arity_ = detail::arity(static_cast<node::type>(flags.type_));
     }
 
-    node::node(const node& src) : t(src.t), u(src.u) {
-        flags.arity_       = src.flags.arity_;
-        flags.is_terminal_ = src.flags.is_terminal_;
+    node::node(const node& src) {
+        flags.type_ = src.flags.type_;
+        u           = src.u;
+        flags.arity_ = detail::arity(static_cast<node::type>(flags.type_));
     }
 
     node& node::operator=(const node& src) {
-        t                  = src.t;
-        u                  = src.u;
-        flags.arity_       = src.flags.arity_;
-        flags.is_terminal_ = src.flags.is_terminal_;
+        flags.type_ = src.flags.type_;
+        u           = src.u;
+        flags.arity_ = detail::arity(static_cast<node::type>(flags.type_));
         return *this;
     }
 
     bool node::is_terminal() const {
-        return detail::is_terminal(t);
+        return detail::is_terminal(static_cast<node::type>(flags.type_));
     }
 
     bool node::is_nonterminal() const {
-        return detail::is_nonterminal(t);
+        return detail::is_nonterminal(static_cast<node::type>(flags.type_));
     }
 
     int node::arity() const {
-        return detail::arity(t);
+        return detail::arity(static_cast<node::type>(flags.type_));
     }
 
 #define CASE(str, val)                                                                             \

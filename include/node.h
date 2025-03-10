@@ -120,6 +120,9 @@ namespace genetic {
         /** Get the arity of the node. If it is a terminal, then a 0 is returned */
         int arity() const;
 
+        /** Get the type of the node */
+        type get_type() const { return static_cast<type>(flags.type_); }
+
         /**
          * @brief Helper method to get node type from input string
          *
@@ -134,7 +137,7 @@ namespace genetic {
         static const int kInvalidFeatureId;
 
         /** node type */
-        type t;
+        // type t;
         union {
             /**
              * if the node is `variable` type, then this is the column id to be used to
@@ -146,8 +149,8 @@ namespace genetic {
         } u;
         /** arity of the node */
         struct {
-            uint8_t arity_ : 2;       // 2 bits for 0-2
-            uint8_t is_terminal_ : 1; // 1 bit for bool
+            uint8_t arity_ : 2; // 2 bits for 0-2
+            uint8_t type_ : 6;  // 6 bits for type
         } flags;
     }; // struct node
 

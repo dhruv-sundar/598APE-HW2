@@ -213,7 +213,7 @@ namespace genetic {
         for (int i = 0; i < prog.len; ++i) {
             if (prog.nodes[i].is_terminal()) {
                 eqn += delim;
-                if (prog.nodes[i].t == node::type::variable) {
+                if (prog.nodes[i].get_type() == node::type::variable) {
                     // variable
                     eqn += "X";
                     eqn += std::to_string(prog.nodes[i].u.fid);
@@ -239,7 +239,7 @@ namespace genetic {
             } else {
                 ar_stack.push(prog.nodes[i].arity());
                 eqn += delim;
-                switch (prog.nodes[i].t) {
+                switch (prog.nodes[i].get_type()) {
                     // binary operators
                     case node::type::add:
                         eqn += "add(";
