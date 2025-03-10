@@ -30,14 +30,14 @@ namespace genetic {
         }
 
         inline float evaluate_node_lookup(const node& n, const float* data, const uint64_t stride,
-                                          const uint64_t idx, const float* in) {
+                                          const uint64_t idx, const float in1, const float in2) {
             const auto& func = function_table[static_cast<size_t>(n.t)];
             if (n.t == node::type::constant) {
                 return n.u.val;
             } else if (n.t == node::type::variable) {
                 return data[(stride * n.u.fid) + idx];
             } else {
-                return func(in[0], in[1]);
+                return func(in1, in2);
             }
         }
 

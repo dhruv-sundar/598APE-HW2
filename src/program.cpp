@@ -28,17 +28,18 @@ namespace genetic {
                 const program&        curr_p = d_progs[pid]; // Current program
 
                 float res   = 0.0f;
-                float in[2] = {0.0f, 0.0f};
+                float in1   = 0.0f;
+                float in2   = 0.0f;
 
                 for (int i = curr_p.len - 1; i >= 0; --i) {
                     const node& curr_node = curr_p.nodes[i];
                     if (curr_node.flags.is_terminal_ == false) {
                         int ar = curr_node.flags.arity_;
-                        in[0]  = eval_stack.pop(); // Min arity of function is 1
+                        in1    = eval_stack.pop(); // Min arity of function is 1
                         if (ar > 1)
-                            in[1] = eval_stack.pop();
+                            in2 = eval_stack.pop();
                     }
-                    res = detail::evaluate_node_lookup(curr_node, data, n_rows, row_id, in);
+                    res = detail::evaluate_node_lookup(curr_node, data, n_rows, row_id, in1, in2);
                     // res = detail::evaluate_node(*curr_node, data, n_rows, row_id, in);
                     eval_stack.push(res);
                 }
