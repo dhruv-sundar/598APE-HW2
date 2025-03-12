@@ -38,3 +38,9 @@ genetic_benchmark
 #Profiles
 *.data
 *.data.old
+
+# cachegrind
+cachegrind.out.*
+
+# annotated
+annotated_*
