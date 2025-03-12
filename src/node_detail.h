@@ -1,5 +1,6 @@
 #pragma once
 
+#include "constants.h"
 #include "../include/evaluate.h"
 #include "../include/node.h"
 #include <cmath>

@@ -210,7 +210,7 @@ namespace genetic {
         std::stack<int> ar_stack;
         ar_stack.push(0);
 
-        for (int i = 0; i < prog.len; ++i) {
+        for (int i = prog.len-1; i >= 0; --i) {
             if (prog.nodes[i].is_terminal()) {
                 eqn += delim;
                 if (prog.nodes[i].t == node::type::variable) {

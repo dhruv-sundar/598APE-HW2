@@ -11,6 +11,7 @@
 #include <program.h>
 #include <random>
 #include <stack>
+#include <cassert>
 
 namespace genetic {
 
@@ -24,14 +25,17 @@ namespace genetic {
         stack<float, MaxSize> eval_stack;
 #pragma omp parallel for schedule(dynamic) private(eval_stack)
         for (uint64_t pid = 0; pid < n_progs; ++pid) {
+            const program&        curr_p = d_progs[pid]; // Current program
+            // for (int i = 0; i < curr_p.len; ++i) {
+            //     assert(curr_p.nodes[i].t >= node::type::variable && curr_p.nodes[i].t <= node::type::functions_end);
+            // }
             for (uint64_t row_id = 0; row_id < n_rows; ++row_id) {
                 eval_stack.clear();
-                const program&        curr_p = d_progs[pid]; // Current program
 
                 // float res   = 0.0f;
                 // float in[2] = {0.0f, 0.0f};
 
-                for (int i = curr_p.len - 1; i >= 0; --i) {
+                for (int i = 0; i < curr_p.len; ++i) {
                     const node& curr_node = curr_p.nodes[i];
                     // if (curr_node.flags.is_terminal_ == false) {
                     //     int ar = curr_node.flags.arity_;
@@ -167,9 +171,14 @@ namespace genetic {
      * @param rng     Random number generator for subtree selection
      * @return A tuple [first,last) which contains the required subtree
      */
-    std::pair<int, int> get_subtree(node* pnodes, int len, PhiloxEngine& rng) {
-        int start, end;
-        start = end = 0;
+    std::pair<int, int> get_subtree(node* pnodes, int nodes_arr_len, int len, PhiloxEngine& rng) {
+        
+        assert(pnodes[0].is_terminal());
+        
+        // Calculate actual end idx from len
+        int start_idx = nodes_arr_len - 1;
+        int end_idx = nodes_arr_len - 1 - len;
+        int offset = end_idx + 1;
 
         // Specify RNG
         uniform_real_distribution_custom<float> dist_uniform(0.0f, 1.0f);
@@ -179,9 +188,9 @@ namespace genetic {
         std::vector<float> node_probs(len, 0.1);
         float              sum = 0.1 * len;
 
-        for (int i = 0; i < len; ++i) {
+        for (int i = start_idx; i > end_idx; --i) {
             if (pnodes[i].is_nonterminal()) {
-                node_probs[i] = 0.9;
+                node_probs[i - offset] = 0.9;
                 sum += 0.8;
             }
         }
@@ -192,19 +201,18 @@ namespace genetic {
         }
 
         // Compute cumulative sum
-        std::partial_sum(node_probs.begin(), node_probs.end(), node_probs.begin());
+        std::partial_sum(node_probs.rbegin(), node_probs.rend(), node_probs.rbegin());
 
-        start = std::lower_bound(node_probs.begin(), node_probs.end(), bound) - node_probs.begin();
-        end   = start;
+        auto it = std::lower_bound(node_probs.rbegin(), node_probs.rend(), bound);
+        int start = node_probs.rend() - it - 1 + offset;
+        int end   = start;
 
         // Iterate until all function arguments are satisfied in current subtree
         int num_args = 1;
-        while (num_args > end - start) {
-            node curr;
-            curr = pnodes[end];
-            if (curr.is_nonterminal())
-                num_args += curr.arity();
-            ++end;
+        while (num_args > start - end) {
+            if (pnodes[end].is_nonterminal())
+                num_args += pnodes[end].arity();
+            --end;
         }
 
         return std::make_pair(start, end);
@@ -213,7 +221,7 @@ namespace genetic {
     int get_depth(const program& p_out) {
         int             depth = 0;
         std::stack<int> arity_stack;
-        for (auto i = 0; i < p_out.len; ++i) {
+        for (auto i = p_out.len - 1; i >= 0; --i) {
             node curr(p_out.nodes[i]);
 
             // Update depth
@@ -324,7 +332,7 @@ namespace genetic {
         // Set new program parameters - need to do a copy as
         // nodelist will be deleted using RAII semantics
         p_out.nodes = std::make_unique<node[]>(nodelist.size());
-        std::copy(nodelist.begin(), nodelist.end(), p_out.nodes.get());
+        std::copy(nodelist.rbegin(), nodelist.rend(), p_out.nodes.get());
 
         p_out.len          = nodelist.size();
         p_out.metric       = params.metric;
@@ -383,9 +391,11 @@ namespace genetic {
     void crossover(const program& prog, const program& donor, program& p_out,
                    [[maybe_unused]] const param& params, PhiloxEngine& rng) {
         // Get a random subtree of prog to replace
-        std::pair<int, int> prog_slice = get_subtree(prog.nodes.get(), prog.len, rng);
+        std::pair<int, int> prog_slice = get_subtree(prog.nodes.get(), prog.len, prog.len, rng);
         int                 prog_start = prog_slice.first;
         int                 prog_end   = prog_slice.second;
+
+        assert(prog.depth < MAX_STACK_SIZE);
 
         // Set metric of output program
         p_out.metric = prog.metric;
@@ -393,37 +403,42 @@ namespace genetic {
         // MAX_STACK_SIZE can only handle tree of depth MAX_STACK_SIZE -
         // max(func_arity=2) + 1 Thus we continuously hoist the donor subtree. Actual
         // indices in donor
-        int donor_start  = 0;
-        int donor_end    = donor.len;
+        int donor_start  = donor.len - 1;
+        int donor_end    = -1;
         int output_depth = 0;
         do {
             // Get donor subtree
             std::pair<int, int> donor_slice =
-                get_subtree(donor.nodes.get() + donor_start, donor_end - donor_start, rng);
+                get_subtree(donor.nodes.get(), donor_start + 1, donor_start - donor_end, rng);
 
             // Get indices w.r.t current subspace [donor_start,donor_end)
             int donor_substart = donor_slice.first;
             int donor_subend   = donor_slice.second;
 
             // Update relative indices to global indices
-            donor_substart += donor_start;
-            donor_subend += donor_start;
+            // int offset = donor.len - donor_start - 1;
+            // donor_substart -= offset;
+            // donor_subend -= offset;
 
             // Update to new subspace
             donor_start = donor_substart;
             donor_end   = donor_subend;
 
             // Evolve on current subspace
-            p_out.len = (prog_start) + (donor_end - donor_start) + (prog.len - prog_end);
+            p_out.len = (prog_end + 1) + (donor_start - donor_end) + (prog.len - prog_start - 1);
             // delete[] p_out.nodes;
             p_out.nodes = std::make_unique<node[]>(p_out.len);
 
             // Copy slices using std::copy
-            std::copy(prog.nodes.get(), prog.nodes.get() + prog_start, p_out.nodes.get());
-            std::copy(donor.nodes.get() + donor_start, donor.nodes.get() + donor_end,
-                      p_out.nodes.get() + prog_start);
-            std::copy(prog.nodes.get() + prog_end, prog.nodes.get() + prog.len,
-                      p_out.nodes.get() + (prog_start) + (donor_end - donor_start));
+            // std::copy(prog.nodes.get(), prog.nodes.get() + prog_start, p_out.nodes.get());
+            // std::copy(donor.nodes.get() + donor_start, donor.nodes.get() + donor_end,
+            //           p_out.nodes.get() + prog_start);
+            // std::copy(prog.nodes.get() + prog_end, prog.nodes.get() + prog.len,
+            //           p_out.nodes.get() + (prog_start) + (donor_end - donor_start));
+            
+            std::copy(prog.nodes.get(), prog.nodes.get() + prog_end + 1, p_out.nodes.get());
+            std::copy(donor.nodes.get() + donor_end + 1, donor.nodes.get() + donor_start + 1, p_out.nodes.get() + prog_end + 1);
+            std::copy(prog.nodes.get() + prog_start + 1, prog.nodes.get() + prog.len, p_out.nodes.get() + prog_end + 1 + (donor_start - donor_end));
 
             output_depth = get_depth(p_out);
         } while (output_depth >= MAX_STACK_SIZE);
@@ -444,33 +459,38 @@ namespace genetic {
                         PhiloxEngine& rng) {
         // Replace program subtree with a random sub-subtree
 
-        std::pair<int, int> prog_slice = get_subtree(prog.nodes.get(), prog.len, rng);
+        std::pair<int, int> prog_slice = get_subtree(prog.nodes.get(), prog.len, prog.len, rng);
         int                 prog_start = prog_slice.first;
         int                 prog_end   = prog_slice.second;
 
         std::pair<int, int> sub_slice =
-            get_subtree(prog.nodes.get() + prog_start, prog_end - prog_start, rng);
+            get_subtree(prog.nodes.get(), prog_start + 1, prog_start - prog_end, rng);
         int sub_start = sub_slice.first;
         int sub_end   = sub_slice.second;
 
         // Update subtree indices to global indices
-        sub_start += prog_start;
-        sub_end += prog_start;
+        // sub_start += prog_start;
+        // sub_end += prog_start;
 
-        p_out.len    = (prog_start) + (sub_end - sub_start) + (prog.len - prog_end);
+        p_out.len    = (prog_end + 1) + (sub_start - sub_end) + (prog.len - prog_start - 1);
         p_out.nodes  = std::make_unique<node[]>(p_out.len);
         p_out.metric = prog.metric;
 
 
         // Copy node slices using std::copy
-        std::copy(prog.nodes.get(), prog.nodes.get() + prog_start, p_out.nodes.get());
-        std::copy(prog.nodes.get() + sub_start, prog.nodes.get() + sub_end,
-                  p_out.nodes.get() + prog_start);
-        std::copy(prog.nodes.get() + prog_end, prog.nodes.get() + prog.len,
-                  p_out.nodes.get() + (prog_start) + (sub_end - sub_start));
+        // std::copy(prog.nodes.get(), prog.nodes.get() + prog_start, p_out.nodes.get());
+        // std::copy(prog.nodes.get() + sub_start, prog.nodes.get() + sub_end,
+        //           p_out.nodes.get() + prog_start);
+        // std::copy(prog.nodes.get() + prog_end, prog.nodes.get() + prog.len,
+        //           p_out.nodes.get() + (prog_start) + (sub_end - sub_start));
+
+        std::copy(prog.nodes.get(), prog.nodes.get() + prog_end + 1, p_out.nodes.get());
+        std::copy(prog.nodes.get() + sub_end + 1, prog.nodes.get() + sub_start + 1, p_out.nodes.get() + prog_end + 1);
+        std::copy(prog.nodes.get() + prog_start + 1, prog.nodes.get() + prog.len, p_out.nodes.get() + prog_end + 1 + (sub_start - sub_end));
 
         // Update depth
         p_out.depth = get_depth(p_out);
+        assert(p_out.depth < MAX_STACK_SIZE);
     }
 
 } // namespace genetic
