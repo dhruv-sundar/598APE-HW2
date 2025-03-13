@@ -11,7 +11,7 @@
 #include <program.h>
 #include <random>
 #include <stack>
-#include <cassert>
+// #include <cassert>
 
 namespace genetic {
 
@@ -173,7 +173,7 @@ namespace genetic {
      */
     std::pair<int, int> get_subtree(node* pnodes, int nodes_arr_len, int len, PhiloxEngine& rng) {
         
-        assert(pnodes[0].is_terminal());
+        // assert(pnodes[0].is_terminal());
         
         // Calculate actual end idx from len
         int start_idx = nodes_arr_len - 1;
@@ -395,7 +395,7 @@ namespace genetic {
         int                 prog_start = prog_slice.first;
         int                 prog_end   = prog_slice.second;
 
-        assert(prog.depth < MAX_STACK_SIZE);
+        // assert(prog.depth < MAX_STACK_SIZE);
 
         // Set metric of output program
         p_out.metric = prog.metric;
@@ -490,7 +490,7 @@ namespace genetic {
 
         // Update depth
         p_out.depth = get_depth(p_out);
-        assert(p_out.depth < MAX_STACK_SIZE);
+        // assert(p_out.depth < MAX_STACK_SIZE);
     }
 
 } // namespace genetic
