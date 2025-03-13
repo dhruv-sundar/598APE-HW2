@@ -120,6 +120,9 @@ namespace genetic {
         /** Get the arity of the node. If it is a terminal, then a 0 is returned */
         int arity() const;
 
+        /** Get the type of the node */
+        type get_type() const { return static_cast<type>(flags.type_); }
+
         /**
          * @brief Helper method to get node type from input string
          *
@@ -134,25 +137,20 @@ namespace genetic {
         static const int kInvalidFeatureId;
 
         /** node type */
-        type t;
-        // union {
-            
-            
-        // } u;
-        // Omitting union because 12 vs. 16 bytes is not that big, and now nodes won't split a cacheline
-        /**
-         * if the node is `variable` type, then this is the column id to be used to
-         * fetch its value, from the input dataset
-         */
-        int fid;
-        /** if the node is `constant` type, then this is the value of the node */
-        float val;
+        // type t;
+        union {
+            /**
+             * if the node is `variable` type, then this is the column id to be used to
+             * fetch its value, from the input dataset
+             */
+            int fid;
+            /** if the node is `constant` type, then this is the value of the node */
+            float val;
+        } u;
         /** arity of the node */
         struct {
-            uint8_t arity_ : 2;       // 2 bits for 0-2
-            uint8_t is_terminal_ : 1; // 1 bit for bool
+            uint8_t arity_ : 2; // 2 bits for 0-2
+            uint8_t type_ : 6;  // 6 bits for type
         } flags;
     }; // struct node
-
-    constexpr int _ = sizeof(node);
 } // namespace genetic

@@ -32,12 +32,12 @@ namespace genetic {
 
         inline void evaluate_node_lookup(const node& n, const float* data, const uint64_t stride,
                                           const uint64_t idx, stack<float, MAX_STACK_SIZE>& eval_stack) {
-            if (n.t == node::type::constant) {
-                eval_stack.push(n.val);
-            } else if (n.t == node::type::variable) {
-                eval_stack.push(data[(stride * n.fid) + idx]);
+            if (n.get_type() == node::type::constant) {
+                eval_stack.push(n.u.val);
+            } else if (n.get_type() == node::type::variable) {
+                eval_stack.push(data[(stride * n.u.fid) + idx]);
             } else {
-                const auto& func = function_table[static_cast<size_t>(n.t)];
+                const auto& func = function_table[static_cast<size_t>(n.get_type())];
                 func(eval_stack);
             }
         }
