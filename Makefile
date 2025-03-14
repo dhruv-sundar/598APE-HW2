@@ -1,5 +1,5 @@
 CXX := g++
-CXXFLAGS := -std=c++17 -Wall -Wextra -I include -I. -gdwarf-4 -O2 -march=native -fopenmp
+CXXFLAGS := -std=c++17 -Wall -Wextra -I include -I. -g -O2 -march=native -fopenmp
 LDFLAGS := -lstdc++ -lm
 
 # Directories
