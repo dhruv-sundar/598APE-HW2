@@ -2,6 +2,7 @@
 
 #include "../include/evaluate.h"
 #include "../include/node.h"
+#include "reg_stack.h"
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
@@ -29,15 +30,15 @@ namespace genetic {
             return 0;
         }
 
-        inline float evaluate_node_lookup(const node& n, const float* data, const uint64_t stride,
-                                          const uint64_t idx, const float in1, const float in2) {
-            const auto& func = function_table[static_cast<size_t>(n.get_type())];
+        inline void evaluate_node_lookup(const node& n, const float* data, const uint64_t stride,
+                                          const uint64_t idx, stack<float, MAX_STACK_SIZE>& eval_stack) {
             if (n.get_type() == node::type::constant) {
-                return n.u.val;
+                eval_stack.push(n.u.val);
             } else if (n.get_type() == node::type::variable) {
-                return data[(stride * n.u.fid) + idx];
+                eval_stack.push(data[(stride * n.u.fid) + idx]);
             } else {
-                return func(in1, in2);
+                const auto& func = function_table[static_cast<size_t>(n.get_type())];
+                func(eval_stack);
             }
         }
 
